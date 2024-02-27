@@ -3,7 +3,6 @@
 ### I have used HTML5, CSS3 and JS in this project. (I have used cropperJS library to allow the user to cropp the image of the table)
 
 ### The idea of this project 👇👇👇
-Sure, here's a more casual and simplified version:
 Once, I went to a billiard club to play some snooker. After finishing my game, I headed to pay for the table. I noticed the guy in charge doing all the math on paper to figure out the price for each table per hour. That seemed like a real hassle.
 Then, I had this idea: why not create an app for this? The app could let users easily set up, update, and delete tables. Each table would have its own name, number, and price, along with a timer.
 With this app, people wouldn't have to bother with manual calculations anymore. Just hit 'start', and it'll keep track of time and price for each table, all separately. Easy peasy!
