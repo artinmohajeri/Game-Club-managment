@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="cropperjs/cropper.min.css">
+    <title>Game Club</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #38444d;
+            margin: 0;
+            height: 100vh;
+            padding: 0;
+        }
+
+        nav {
+            position: relative;
+        }
+
+        .menu {
+            position: absolute;
+            right: 70px;
+            top: 7px;
+            font-size: 36px;
+            cursor: pointer;
+        }
+
+        #demo {
+            background-color: #cfcfcf;
+        }
+
+        .table {
+            width: 220px;
+            height: 400px;
+            box-shadow: 0px 0px 20px 6px #171717;
+            border-radius: 4px;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .table {
+            overflow: hidden;
+            margin: 30px 50px;
+        }
+
+        .table .table-img {
+            width: 100%;
+            height: 40%;
+            background-color: #cfcfcf;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .table .table-img img {
+            transition: 0.4s;
+            width: 100%;
+            height: 100%;
+        }
+
+        .table .table-info {
+            width: 100%;
+            height: 30%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .table .table-info h3 {
+            color: #cccccc;
+        }
+
+        .table .table-info span {
+            color: #b2b2b2;
+        }
+
+        .table .table-timing {
+            width: 100%;
+            height: 30%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding-bottom: 20px;
+        }
+
+        .table .table-timing span {
+            color: #ffffff;
+            font-size: 24px;
+        }
+
+        .start-btn,
+        .reset-btn {
+            width: 80px;
+            height: 30px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            border: none;
+            transition: 0.2s;
+
+        }
+
+        .start-btn:hover,
+        .reset-btn:hover {
+            background-color: #cccccccc;
+        }
+
+        .start-btn:active,
+        .reset-btn:active {
+            background-color: #858585;
+        }
+
+        label[for="table_img"],
+        label[for="edit-file"] {
+            width: 150px;
+            height: 40px;
+            border: 1px solid black;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        label[for="table_img"]:hover,
+        label[for="edit-file"]:hover {
+            background-color: black;
+            color: white;
+        }
+
+        .table:hover .table-img img {
+            transform: scale(1.1);
+            filter: brightness(40%);
+        }
+
+        .table:hover #dots {
+            opacity: 1;
+            visibility: visible;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #dots {
+            color: #e6e6e6;
+            font-size: 20px;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+            background-color: black;
+            width: 20px;
+            height: 20px;
+            border-radius: 100%;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .edit-remove {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            width: 70px;
+            height: 40px;
+            display: none;
+        }
+
+        .edit-remove .remove-table,
+        .edit-remove .edit-table {
+            width: 100%;
+            border-radius: 10px;
+            transition: 0.2s;
+            height: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #eeeeee;
+            font-size: 12px;
+            background-color: #565656;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .remove-table:hover,
+        .edit-table:hover {
+            background-color: #242424;
+        }
+
+        .crop-modal {
+            overflow: hidden;
+            background-color: white;
+            width: 600px;
+            height: 600px;
+            position: absolute;
+            top: calc(50% - 300px);
+            left: calc(50% - 300px);
+            z-index: 10000;
+        }
+
+        .crop-image {
+            height: 90%;
+        }
+    </style>
+</head>
+
+<body class="position-relative">
+
+    <div class="container">
+        <nav class="mt-3 text-light">
+            <h1 class="text-center" id="title"></h1>
+            <i class="fa fa-bars menu" aria-hidden="false" data-bs-toggle="offcanvas" data-bs-target="#demo"></i>
+        </nav>
+
+        <div class="offcanvas offcanvas-end" id="demo">
+            <div class="offcanvas-header">
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+            </div>
+
+            <nav class="navbar bg-light">
+                <div class="container-fluid">
+                    <ul class="navbar-nav">
+                        <li class="nav-item my-3">
+                            <a class="nav-link" href="#" data-bs-toggle="modal"
+                                data-bs-target="#create_table_modal">Create Table</a>
+                        </li>
+                        <li class="nav-item my-3">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#title_modal">Set
+                                Title</a>
+                        </li>
+                        <li class="nav-item my-3">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#delete_all_modal">Clear
+                                all Tables</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+
+        </div>
+
+    </div>
+
+    <div class="box container mt-5 justify-content-center d-flex flex-wrap">
+
+        <div class="table d-none">
+            <div class="table-img">
+                <img src="img/logo.avif" alt="img" id="table_image">
+                <i class="fa fa-ellipsis-v" aria-hidden="true" id="dots"></i>
+                <div class="edit-remove" data-bs-toggle="modal" data-bs-target="#edit-modal">
+                    <div class="edit-table">
+                        <i class="fa fa-pencil" aria-hidden="true"></i>&nbsp; edit
+                    </div>
+                    <div class="remove-table" data-bs-toggle="modal" data-bs-target="#remove-table-modal">
+                        <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;remove
+                    </div>
+                </div>
+            </div>
+            <div class="table-info text-center">
+                <h3>Snooker</h3>
+                <span class="table-num">table 1</span>
+            </div>
+            <div class="table-timing">
+                <span class="timer">00:00:00</span>
+                <span class="mb-3 price">0.00$</span>
+                <div class="d-flex align-items-center justify-content-between ">
+                    <button type="button"
+                        class="reset-btn d-flex align-items-center justify-content-center mx-1">Reset</button>
+                    <button type="button"
+                        class="start-btn d-flex align-items-center justify-content-center mx-1">Start</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="modal fade" id="create_table_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Create Table</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="#" method="" id="make-table">
+                    <div class="modal-body">
+                        <label id="file-label" for="table_img" class="">Choose an image</label><br>
+                        <input class="d-none" type="file" name="file" id="table_img">
+                        <input type="text" name="game" id="table_name" class="form-control my-3"
+                            placeholder="game name..." maxlength="18" required>
+                        <input type="number" name="table" id="table_number" class="form-control my-3"
+                            placeholder="table number..." maxlength="5" required>
+                        <input type="number" name="price" id="table_price" class="form-control my-3"
+                            placeholder="price per houre" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="title_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Set The Title</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <!-- Modal body -->
+                <form action="" method="" id="set-title-form">
+                    <div class="modal-body">
+                        <input required id="set-title-input" type="text" maxlength="40" class="form-control"
+                            placeholder="Your Title...">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Change Title</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="delete_all_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete all the tables?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="clear-all-tables">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="remove-table-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this table?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="delete_table_btn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="edit-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Table</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="#" method="" id="edit-table-form">
+                    <div class="modal-body">
+                        <label for="edit-file" id="edit-file-label" class="">Choose an image</label><br>
+                        <input class="d-none" type="file" name="file" id="edit-file">
+                        <input type="text" name="game" id="edit-game" class="form-control my-3"
+                            placeholder="game name..." maxlength="18" required>
+                        <input type="number" name="table" id="edit-table" class="form-control my-3"
+                            placeholder="table number..." maxlength="5" required>
+                        <input type="number" name="price" id="edit-price" class="form-control my-3"
+                            placeholder="price per houre" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Edit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="crop-modal d-none">
+        <div class="crop-image d-flex align-items-center justify-content-center">
+            <img width="400" src="" alt="" id="main-image">
+        </div>
+        <button type="button" class="btn btn-secondary ms-4 mt-2" id="save-cropped-img">save image</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="cropperjs/cropper.min.js"></script>
+    <script>
+        const $ = document.querySelector.bind(document);
+
+        if (! sessionStorage.getItem(sessionStorage.key("title"))) {
+            $("#title").innerHTML = "Game Club"
+        }else{
+            $("#title").innerHTML = sessionStorage.getItem(sessionStorage.key("title"));
+        }
+
+        let croppedImage = "./img/logo.avif";
+        $("#table_img").addEventListener("change", function () {
+            const fileInput = this;
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            if ($("#main-image").cropper) {
+                $("#main-image").cropper.destroy();
+            }
+
+            reader.onload = function (e) {
+                const image = new Image();
+                $("#main-image").setAttribute("src", e.target.result);
+                const cropper = new Cropper($("#main-image"), {
+                    aspectRatio: 1.375,
+                    viewMode: 1,
+                });
+                $("#save-cropped-img").addEventListener("click", function () {
+                    croppedImage = cropper.getCroppedCanvas().toDataURL("image/png");
+                    $(".crop-modal").classList.add("d-none");
+                });
+            };
+            reader.readAsDataURL(file);
+
+            $(".crop-modal").classList.remove("d-none");
+            if ($("#table_img").files.length > 0) {
+                let file = $("#table_img").files[0];
+                const fileName = $("#table_img").value.split("\\").pop(); // Get the file name from the full path
+                $("#file-label").innerHTML = fileName.substring(0, 16);
+            } else {
+                $("#file-label").innerHTML = "";
+                $("#file-label").textContent = "No file chosen";
+            }
+        });
+
+        $("#make-table").addEventListener("submit", function (e) {
+            e.preventDefault();
+            let tableName = $("#table_name").value.trim();
+            let tableNumber = Number($("#table_number").value.trim());
+            let tablePrice = Number($("#table_price").value.trim());
+            let tableImage = $("#table_img");
+            let path = tableImage.value.substring(tableImage.value.lastIndexOf("\\") + 1);
+            path = path.substring(0, 16);
+            const file = tableImage.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    let tableObject = {
+                        tableName: tableName.trim(),
+                        tableNumber: tableNumber,
+                        tablePrice: tablePrice,
+                        tableImage: croppedImage,
+                        imagePath: path,
+                    };
+
+                    let tableString = JSON.stringify(tableObject);
+                    localStorage.setItem([tableName, tableNumber, tablePrice], tableString);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                let dataURL = "./img/logo.avif";
+
+                let tableObject = {
+                    tableName: tableName.trim(),
+                    tableNumber: tableNumber,
+                    tablePrice: tablePrice,
+                    tableImage: dataURL,
+                    imagePath: "",
+                };
+
+                let tableString = JSON.stringify(tableObject);
+                localStorage.setItem([tableName, tableNumber, tablePrice], tableString);
+            }
+            location.reload();
+        });
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const clonedTable = $(".table").cloneNode(true);
+            clonedTable.classList.remove("d-none");
+
+            // clonedTable.querySelector("#dots").setAttribute("key",i)
+            clonedTable.querySelector("#dots").addEventListener("click", function () {
+                clonedTable.querySelector(".edit-remove").style.display = "block";
+            });
+            clonedTable.addEventListener("mouseleave", function () {
+                clonedTable.querySelector(".edit-remove").style.display = "none";
+            });
+
+            let key = localStorage.key(i);
+            let obj = localStorage.getItem(key);
+            obj = JSON.parse(obj);
+
+            clonedTable.querySelector("h3").innerHTML = obj.tableName;
+            clonedTable.querySelector(".table-num").innerHTML =
+                `table ${obj.tableNumber}`;
+            clonedTable.querySelector("#table_image").setAttribute("src", obj.tableImage);
+            $(".box").appendChild(clonedTable);
+        }
+
+        let id = 0;
+        let n;
+        document.querySelectorAll(".remove-table").forEach((element) => {
+            element.setAttribute("id", id);
+            id++;
+            element.addEventListener("click", function () {
+                n = element.id;
+                $("#delete_table_btn").addEventListener("click", function () {
+                    localStorage.removeItem(localStorage.key(n - 1));
+                    location.reload();
+                });
+            });
+        });
+        let isRunning;
+        let editId = 0;
+        let editN;
+        document.querySelectorAll(".edit-table").forEach((element) => {
+            element.setAttribute("id", editId);
+            editId++;
+            element.addEventListener("click", function () {
+                editN = Number(element.id);
+                $("#edit-game").value = JSON.parse(
+                    localStorage.getItem(localStorage.key(editN - 1)),
+                ).tableName;
+                $("#edit-table").value = JSON.parse(
+                    localStorage.getItem(localStorage.key(editN - 1)),
+                ).tableNumber;
+                $("#edit-price").value = JSON.parse(
+                    localStorage.getItem(localStorage.key(editN - 1)),
+                ).tablePrice;
+                $("#edit-file-label").innerHTML = JSON.parse(
+                    localStorage.getItem(localStorage.key(editN - 1)),
+                ).imagePath;
+                if (!$("#edit-file-label").innerHTML) {
+                    $("#edit-file-label").innerHTML = "No file chosen";
+                }
+
+                $("#edit-file").addEventListener("change", function () {
+                    const fileInput = this;
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+                    if ($("#main-image").cropper) {
+                        $("#main-image").cropper.destroy();
+                    }
+                    reader.onload = function (e) {
+                        const image = new Image();
+                        $("#main-image").setAttribute("src", e.target.result);
+                        const cropper = new Cropper($("#main-image"), {
+                            aspectRatio: 1.375,
+                            viewMode: 1,
+                        });
+                        $("#save-cropped-img").addEventListener("click", function () {
+                            croppedImage = cropper.getCroppedCanvas().toDataURL("image/png");
+                            $(".crop-modal").classList.add("d-none");
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                    $(".crop-modal").classList.remove("d-none");
+
+                    if ($("#edit-file").files.length > 0) {
+                        let file = $("#edit-file").files[0];
+                        const fileName = $("#edit-file").value.split("\\").pop(); // Get the file name from the full path
+                        $("#edit-file-label").innerHTML = fileName.substring(0, 16);
+                    } else {
+                        $("#edit-file-label").innerHTML = "";
+                        $("#edit-file-label").textContent = "No file chosen";
+                    }
+                });
+
+                $("#edit-table-form").addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    const file = $("#edit-file").files[0];
+                    let dataURL = "./img/logo.avif";
+                    let path = $("#edit-file").value.substring(
+                        $("#edit-file").value.lastIndexOf("\\") + 1,
+                    );
+                    path = path.substring(0, 16);
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (event) {
+                            let existedTableObject = {
+                                tableName: $("#edit-game").value.trim(),
+                                tableNumber: $("#edit-table").value,
+                                tablePrice: $("#edit-price").value,
+                                tableImage: croppedImage,
+                                imagePath: path,
+                            };
+                            existedTableObject = JSON.stringify(existedTableObject);
+                            localStorage.setItem(localStorage.key(editN - 1), existedTableObject);
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        let existedTableObject = {
+                            tableName: $("#edit-game").value.trim(),
+                            tableNumber: $("#edit-table").value,
+                            tablePrice: $("#edit-price").value,
+                            tableImage: dataURL,
+                            imagePath: path,
+                        };
+                        existedTableObject = JSON.stringify(existedTableObject);
+                        localStorage.setItem(localStorage.key(editN - 1), existedTableObject);
+                    }
+                    location.reload();
+                });
+            });
+        });
+        let timerId = 0;
+        document.querySelectorAll(".timer").forEach((e) => {
+            e.setAttribute("id", timerId);
+            timerId++;
+        });
+
+        let priceId = 0;
+        document.querySelectorAll(".price").forEach((e) => {
+            e.setAttribute("id", priceId);
+            priceId++;
+        });
+
+        let startId = 0;
+        let timers = []; // To store interval IDs for each table
+        let totalSecondsArray = []; // To store total seconds for each table
+
+        document.querySelectorAll(".start-btn").forEach((element) => {
+            element.setAttribute("id", startId);
+            startId++;
+
+            element.addEventListener("click", function () {
+                let tableId = element.id;
+
+                // Check if a timer for this table already exists
+                if (!timers[tableId]) {
+                    // Start a new timer
+                    totalSecondsArray[tableId] = 0;
+                    element.innerHTML = "Pause";
+
+                    timers[tableId] = setInterval(() => {
+                        totalSecondsArray[tableId]++;
+                        updateTableDisplay(tableId, totalSecondsArray[tableId]);
+
+                        document.querySelectorAll(".price").forEach((e) => {
+                            if (e.id == element.id) {
+                                pricePerHoure = JSON.parse(
+                                    localStorage.getItem(localStorage.key(element.id - 1)),
+                                ).tablePrice;
+                                let price = (pricePerHoure * totalSecondsArray[tableId]) / 3600;
+                                e.innerHTML = `${price.toFixed(2)}$`;
+                            }
+                        });
+                    }, 1000);
+                } else {
+                    // Pause or resume the existing timer
+                    let isRunning = element.innerHTML === "Pause";
+                    element.innerHTML = isRunning ? "Resume" : "Pause";
+
+                    if (isRunning) {
+                        clearInterval(timers[tableId]);
+                    } else {
+                        timers[tableId] = setInterval(() => {
+                            totalSecondsArray[tableId]++;
+                            updateTableDisplay(tableId, totalSecondsArray[tableId]);
+
+                            document.querySelectorAll(".price").forEach((e) => {
+                                if (e.id == element.id) {
+                                    pricePerHoure = JSON.parse(
+                                        localStorage.getItem(localStorage.key(element.id - 1)),
+                                    ).tablePrice;
+                                    let price = (pricePerHoure * totalSecondsArray[tableId]) / 3600;
+                                    e.innerHTML = `${price.toFixed(2)}$`;
+                                }
+                            });
+                        }, 1000);
+                    }
+                }
+            });
+        });
+
+        function updateTableDisplay(tableId, totalSeconds) {
+            let hours = Math.floor(totalSeconds / 3600);
+            let minutes = Math.floor((totalSeconds % 3600) / 60);
+            let seconds = totalSeconds % 60;
+
+            hours = hours.toString().padStart(2, "0");
+            minutes = minutes.toString().padStart(2, "0");
+            seconds = seconds.toString().padStart(2, "0");
+
+            document.querySelectorAll(".timer").forEach((e) => {
+                if (e.id == tableId) {
+                    e.innerHTML = `${hours}:${minutes}:${seconds}`;
+                }
+            });
+        }
+
+        document.querySelectorAll(".reset-btn").forEach((resetButton) => {
+            resetButton.addEventListener("click", function () {
+                let tableId =
+                    resetButton.parentElement.parentElement.querySelector(".start-btn").id;
+
+                // Clear the interval and reset the timer and display
+                clearInterval(timers[tableId]);
+                totalSecondsArray[tableId] = 0;
+
+                document.querySelectorAll(".price").forEach((e) => {
+                    if (e.id == tableId) {
+                        e.innerHTML = "0.00$";
+                    }
+                });
+                document.querySelectorAll(".start-btn").forEach((e) => {
+                    if (e.id == tableId) {
+                        e.innerHTML = "Start";
+                    }
+                });
+
+                updateTableDisplay(tableId, totalSecondsArray[tableId]);
+
+                // Reset the "Start/Pause" button text
+                document.getElementById(tableId).innerHTML = "Start";
+            });
+        });
+
+        $("#clear-all-tables").addEventListener("click", function () {
+            localStorage.clear();
+            location.reload();
+        });
+
+        let title = "Game Club";
+        $("#set-title-form").addEventListener("submit", function (e) {
+            e.preventDefault();
+            title = $("#set-title-input").value;
+            sessionStorage.setItem("title", title);
+            location.reload();
+        });
+
+    </script>
+</body>
+
+</html>
